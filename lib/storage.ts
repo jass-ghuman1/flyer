@@ -44,7 +44,13 @@ async function timed<T>(label: string, p: Promise<T>, ms = 8000): Promise<T> {
 }
 
 function netlifyDriver(name: StoreName): Driver {
-  const raw = getStore({ name: `flyer-builder-${name}` });
+  // Next.js patches global fetch inside route handlers; Blobs calls through the patched fetch hung on Netlify.
+  // Use Node's original fetch, uncached.
+  const rawFetch: typeof fetch = (input, init) => {
+    const f = globalThis.fetch as typeof fetch & { _nextOriginalFetch?: typeof fetch };
+    return (f._nextOriginalFetch ?? f)(input, { ...init, cache: 'no-store' });
+  };
+  const raw = getStore({ name: `flyer-builder-${name}`, fetch: rawFetch });
   const store = {
     get: ((k: string, o?: object) => timed(`get ${name}/${k}`, raw.get(k, o as never))) as typeof raw.get,
     setJSON: (k: string, v: unknown) => timed(`setJSON ${name}/${k}`, raw.setJSON(k, v)),
