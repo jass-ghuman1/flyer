@@ -54,7 +54,7 @@ function netlifyDriver(name: StoreName): Driver {
     const body = res.status === 204 || res.status === 304 ? null : await res.arrayBuffer();
     return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
   };
-  const raw = getStore({ name: `flyer-builder-${name}`, fetch: rawFetch });
+  const raw = getStore({ name: `flyer-builder-${name}`, fetch: rawFetch, consistency: 'strong' });
   const store = {
     get: ((k: string, o?: object) => timed(`get ${name}/${k}`, raw.get(k, o as never))) as typeof raw.get,
     setJSON: (k: string, v: unknown) => timed(`setJSON ${name}/${k}`, raw.setJSON(k, v)),
