@@ -32,5 +32,5 @@ export async function middleware(req: NextRequest) {
 export const config = {
   // Pages only. API routes are not routed through middleware (on Netlify, POST requests passed through the
   // edge middleware hung); every API route checks the session itself with guard() instead.
-  matcher: ['/((?!api/|_next/static|_next/image|favicon.ico|robots.txt).*)'],
+  matcher: ['/((?!api/|\.netlify/|_next/static|_next/image|favicon.ico|robots.txt).*)'],
 };

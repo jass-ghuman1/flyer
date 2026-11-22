@@ -17,5 +17,18 @@ export async function GET() {
   } catch (e) {
     out.get = { ms: Date.now() - s, error: String(e) };
   }
+  for (const [label, f] of [['patched', fetch], ['orig', (fetch as unknown as { _nextOriginalFetch?: typeof fetch })._nextOriginalFetch]] as const) {
+    if (!f) { out[label] = 'n/a'; continue; }
+    const t = Date.now();
+    try {
+      const r = await Promise.race([f('https://edge.netlifyblobs.com/', { cache: 'no-store' }), new Promise<Response>((_, rej) => setTimeout(() => rej(new Error('timeout 5s')), 5000))]);
+      out[label] = { ms: Date.now() - t, status: r.status };
+    } catch (e) { out[label] = { ms: Date.now() - t, error: String(e) }; }
+  }
+  const t2 = Date.now();
+  try {
+    const r = await Promise.race([fetch('https://api.netlify.com/api/v1/', { cache: 'no-store' }), new Promise<Response>((_, rej) => setTimeout(() => rej(new Error('timeout 5s')), 5000))]);
+    out.api = { ms: Date.now() - t2, status: r.status };
+  } catch (e) { out.api = { ms: Date.now() - t2, error: String(e) }; }
   return Response.json(out);
 }
