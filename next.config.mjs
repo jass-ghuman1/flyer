@@ -5,7 +5,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
+  serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium', '@netlify/blobs'],
   poweredByHeader: false,
   outputFileTracingRoot: root,
   webpack(config) {
