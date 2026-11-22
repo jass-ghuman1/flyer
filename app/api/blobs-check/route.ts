@@ -18,7 +18,7 @@ export async function GET() {
       const u = String(input instanceof Request ? input.url : input).replace(/[?].*/, '?…');
       const entry: Record<string, unknown> = { u, m: init?.method || 'GET', start: t - s };
       calls.push(entry);
-      try { const r = await fetch(input, init); entry.status = r.status; entry.ms = Date.now() - t; return r; }
+      try { const r = await fetch(input, init); entry.status = r.status; entry.ms = Date.now() - t; const b = await r.arrayBuffer(); entry.bodyMs = Date.now() - t; return new Response(r.status === 204 ? null : b, { status: r.status, headers: r.headers }); }
       catch (e) { entry.err = String(e); throw e; }
     } });
     const v = await Promise.race([store.get('users', { type: 'json' }), new Promise((_, r) => setTimeout(() => r(new Error('timeout 8s')), 8000))]);
