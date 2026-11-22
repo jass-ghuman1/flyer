@@ -11,7 +11,16 @@ export async function GET() {
   const out: Record<string, unknown> = { node: process.version, envCtx: Boolean(process.env.NETLIFY_BLOBS_CONTEXT), globalCtx: Boolean(g.netlifyBlobsContext), ctxInfo };
   const s = Date.now();
   try {
-    const store = getStore({ name: 'flyer-builder-settings' });
+    const calls: unknown[] = [];
+    out.calls = calls;
+    const store = getStore({ name: 'flyer-builder-settings', fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+      const t = Date.now();
+      const u = String(input instanceof Request ? input.url : input).replace(/[?].*/, '?…');
+      const entry: Record<string, unknown> = { u, m: init?.method || 'GET', start: t - s };
+      calls.push(entry);
+      try { const r = await fetch(input, init); entry.status = r.status; entry.ms = Date.now() - t; return r; }
+      catch (e) { entry.err = String(e); throw e; }
+    } });
     const v = await Promise.race([store.get('users', { type: 'json' }), new Promise((_, r) => setTimeout(() => r(new Error('timeout 8s')), 8000))]);
     out.get = { ms: Date.now() - s, found: v != null };
   } catch (e) {
