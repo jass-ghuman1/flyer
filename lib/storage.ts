@@ -25,8 +25,34 @@ function useLocal(): boolean {
   return process.env.NODE_ENV === 'development';
 }
 
+/** Fails fast (with a log line) instead of letting a stuck storage call hang the request. */
+async function timed<T>(label: string, p: Promise<T>, ms = 8000): Promise<T> {
+  const start = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      p,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`Storage timed out (${label}).`)), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+    const took = Date.now() - start;
+    if (took > 1500) console.warn(`[storage] slow ${label}: ${took} ms`);
+  }
+}
+
 function netlifyDriver(name: StoreName): Driver {
-  const store = getStore({ name: `flyer-builder-${name}`, consistency: 'strong' });
+  const raw = getStore({ name: `flyer-builder-${name}` });
+  const store = {
+    get: ((k: string, o?: object) => timed(`get ${name}/${k}`, raw.get(k, o as never))) as typeof raw.get,
+    setJSON: (k: string, v: unknown) => timed(`setJSON ${name}/${k}`, raw.setJSON(k, v)),
+    getWithMetadata: ((k: string, o?: object) => timed(`getWithMetadata ${name}/${k}`, raw.getWithMetadata(k, o as never))) as typeof raw.getWithMetadata,
+    set: (k: string, d: ArrayBuffer, o?: { metadata?: Record<string, unknown> }) => timed(`set ${name}/${k}`, raw.set(k, d, o)),
+    delete: (k: string) => timed(`delete ${name}/${k}`, raw.delete(k)),
+    list: (o?: { prefix?: string }) => timed(`list ${name}`, raw.list(o)),
+  };
   return {
     async getJSON<T>(key: string) {
       return ((await store.get(key, { type: 'json' })) as T) ?? null;
