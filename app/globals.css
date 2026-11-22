@@ -114,3 +114,63 @@ table.list th { font-size: 13px; color: var(--muted); }
 
 .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
 .tabs .btn[aria-pressed='true'] { background: #1c1917; color: #fff; }
+
+/* ---------- Contemporary animated background (app pages only, not the flyer/print page) ---------- */
+body.has-rain { background: #140c2c; }
+.rain-bg { position: fixed; inset: 0; z-index: -2; display: block; }
+.rain-glow {
+  position: fixed; inset: -20%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(40% 35% at 15% 20%, rgba(255, 95, 162, 0.28), transparent 70%),
+    radial-gradient(35% 30% at 85% 15%, rgba(106, 213, 255, 0.22), transparent 70%),
+    radial-gradient(45% 40% at 70% 90%, rgba(255, 184, 107, 0.22), transparent 70%);
+  animation: glow-drift 18s ease-in-out infinite alternate;
+}
+@keyframes glow-drift {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  100% { transform: translate3d(3%, -2%, 0) rotate(6deg); }
+}
+body.has-rain .panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px rgba(10, 4, 30, 0.35);
+  animation: rise-in 0.5s cubic-bezier(.2, .8, .2, 1) both;
+}
+body.has-rain .step:nth-child(2) { animation-delay: .05s; }
+body.has-rain .step:nth-child(3) { animation-delay: .1s; }
+body.has-rain .step:nth-child(4) { animation-delay: .15s; }
+body.has-rain .step:nth-child(5) { animation-delay: .2s; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+body.has-rain .topbar {
+  background: rgba(20, 12, 44, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  position: sticky; top: 0; z-index: 30;
+}
+body.has-rain .topbar .brand {
+  background: linear-gradient(90deg, #ff7a59, #ff5fa2, #b48cff, #6ad5ff, #ff7a59);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shimmer 8s linear infinite;
+}
+@keyframes shimmer { to { background-position: 300% 0; } }
+body.has-rain .topbar a, body.has-rain .topbar button { border-color: rgba(255,255,255,.25); }
+body.has-rain .btn { transition: transform .15s ease, box-shadow .15s ease, background .15s ease; }
+body.has-rain .btn:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(255, 95, 162, 0.25); }
+body.has-rain .btn-primary { background: linear-gradient(135deg, #ff7a59, #ff5fa2); border-color: transparent; }
+body.has-rain .btn-primary:hover { background: linear-gradient(135deg, #ff6a45, #f0478f); }
+body.has-rain .step h2 .num { background: linear-gradient(135deg, #ff7a59, #b48cff); }
+body.has-rain .theme-pick { transition: transform .15s ease, border-color .15s ease; }
+body.has-rain .theme-pick:hover { transform: translateY(-2px); }
+body.has-rain .theme-pick[aria-pressed='true'] { border-color: #ff5fa2; background: #fff0f6; }
+body.has-rain .preview-box { background: rgba(20, 12, 44, 0.08); }
+body.has-rain .login-card h1 {
+  background: linear-gradient(90deg, #ff7a59, #ff5fa2, #b48cff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rain-glow, body.has-rain .panel, body.has-rain .topbar .brand { animation: none; }
+}

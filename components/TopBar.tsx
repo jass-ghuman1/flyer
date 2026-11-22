@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/client';
+import RainShell from './RainShell';
 
 export default function TopBar({ active }: { active: 'builder' | 'flyers' | 'settings' }) {
   const [role, setRole] = useState<string>('');
@@ -12,6 +13,8 @@ export default function TopBar({ active }: { active: 'builder' | 'flyers' | 'set
     window.location.href = '/login';
   }
   return (
+    <>
+    <RainShell />
     <nav className="topbar">
       <span className="brand">FLYER BUILDER</span>
       <a className={`btn btn-sm${active === 'builder' ? ' active' : ''}`} href="/">New / edit flyer</a>
@@ -19,5 +22,6 @@ export default function TopBar({ active }: { active: 'builder' | 'flyers' | 'set
       {role === 'admin' && <a className={`btn btn-sm${active === 'settings' ? ' active' : ''}`} href="/settings">Settings</a>}
       <button className="btn btn-sm" onClick={logout}>Log out</button>
     </nav>
+    </>
   );
 }

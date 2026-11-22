@@ -1,6 +1,7 @@
 'use client';
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import RainShell from '@/components/RainShell';
 
 function LoginForm() {
   const params = useSearchParams();
@@ -52,6 +53,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="login-wrap">
+      <RainShell />
       <Suspense>
         <LoginForm />
       </Suspense>
