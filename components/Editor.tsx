@@ -69,6 +69,7 @@ export default function Editor() {
   const [loadError, setLoadError] = useState('');
   const [status, setStatus] = useState<{ text: string; ok: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [format, setFormat] = useState<ExportFormat>('letter');
   const [exporting, setExporting] = useState<ExportFormat | null>(null);
   const [offscreen, setOffscreen] = useState<{ format: ExportFormat; resolve: () => void } | null>(null);
@@ -208,6 +209,26 @@ export default function Editor() {
     }
   }
 
+  async function submitForDesign() {
+    if (!flyer) return;
+    if (problems.some((p) => !p.includes('valid sale price'))) {
+      setStatus({ text: `Before submitting: ${problems[0]}`, ok: false });
+      return;
+    }
+    if (!window.confirm('Submit this flyer? It will be saved and emailed as an AI design prompt.')) return;
+    setSubmitting(true);
+    try {
+      const saved = await save();
+      if (!saved) return;
+      const r = await api<{ attachments: number }>(`/api/flyers/${saved.id}/submit`, { method: 'POST' });
+      setStatus({ text: `Submitted. The AI prompt was emailed${r.attachments ? ` with ${r.attachments} image${r.attachments > 1 ? 's' : ''}` : ''}.`, ok: true });
+    } catch (e) {
+      setStatus({ text: `Submit failed: ${(e as Error).message}`, ok: false });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   function discardDraft() {
     clearDraft(draftKey);
     window.location.reload();
@@ -271,7 +292,10 @@ export default function Editor() {
                 <div className="small muted">{dirty ? 'Unsaved changes (kept in this browser until you save)' : flyerId ? 'All changes saved' : 'Not saved yet'}</div>
               </div>
               <button className="btn" style={{ flex: 'none' }} onClick={newFlyer}>New flyer</button>
-              <button className="btn btn-primary" style={{ flex: 'none' }} onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save flyer'}</button>
+              <button className="btn btn-primary" style={{ flex: 'none' }} onClick={save} disabled={saving || submitting}>{saving ? 'Saving…' : 'Save flyer'}</button>
+              <button className="btn btn-primary" style={{ flex: 'none', background: '#15803d', borderColor: '#15803d' }} onClick={submitForDesign} disabled={saving || submitting}>
+                {submitting ? 'Submitting…' : 'Submit'}
+              </button>
             </div>
             {status && <p className={status.ok ? 'ok small' : 'error small'} role="status" style={{ marginBottom: 0 }}>{status.text}</p>}
           </div>

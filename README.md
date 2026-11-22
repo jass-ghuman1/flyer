@@ -26,6 +26,9 @@ Set these in Netlify: **Site configuration > Environment variables**. Never comm
 | `BDL_API_URL`, `BDL_USERNAME`, `BDL_PASSWORD` or `BDL_API_KEY` | No | Connect Logistics / BDL lookup (stub). Skipped when not set. |
 | `GOOGLE_CSE_API_KEY`, `GOOGLE_CSE_ID` | No | Fallback public product search (Google Programmable Search). Skipped when not set. |
 | `GOOGLE_CSE_QUERY_SUFFIX` | No | Extra words added to the public search (default `Alberta liquor`). |
+| `RESEND_API_KEY` | For Submit | Resend API key used to email the AI flyer prompt when staff click **Submit**. |
+| `SUBMIT_EMAIL_TO` | For Submit | Who receives submitted flyers (comma-separated for several). |
+| `SUBMIT_EMAIL_FROM` | No | Sender, e.g. `Flyers <flyers@yourdomain.com>` once a domain is verified in Resend. Defaults to `onboarding@resend.dev`, which Resend only allows to send to the Resend account's own email address. |
 | `EXPORT_ORIGIN` | No | Only if exports must load the site from a different URL than the one the request came in on. |
 
 Generate a session secret with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
@@ -86,6 +89,11 @@ In development, data is stored in `.data/` instead of Netlify Blobs. To use the 
 4. Item slots (default 20, set by admin; add, remove, reorder, duplicate, clear)
 
 The preview updates as you type. Unsaved work is autosaved in the browser and restored after a refresh.
+
+### Submit (AI prompt by email)
+**Submit** saves the flyer and emails a ready-to-paste ChatGPT / Grok prompt (store, theme, dates, every product,
+size and price, footer lines) to `SUBMIT_EMAIL_TO`, with the product images and store logo attached.
+Built in `lib/aiPrompt.ts` and `app/api/flyers/[id]/submit/route.ts`; sent with Resend (`lib/email.ts`).
 
 ### Item lookup
 `lib/lookup/` has one provider interface tried in order:
