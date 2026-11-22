@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { SESSION_COOKIE, verifySession } from './lib/auth';
 
-const PUBLIC = ['/login', '/api/auth/login'];
+const PUBLIC = ['/login'];
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
@@ -30,6 +30,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next's static build files. Fonts and other assets bundled by Next live under _next/static.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt).*)'],
+  // Pages only. API routes are not routed through middleware (on Netlify, POST requests passed through the
+  // edge middleware hung); every API route checks the session itself with guard() instead.
+  matcher: ['/((?!api/|_next/static|_next/image|favicon.ico|robots.txt).*)'],
 };
